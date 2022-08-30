@@ -1,6 +1,6 @@
 
 <p align="center">
-<img width="200" src=“./Bing-Logo.png” alt="Logo" />
+  <img width="200" src=“./Bing-Logo.png” alt="Logo" />
 </p>
 
 **Bing页面美化**
