@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bing美化
 // @namespace    http://tampermonkey.net/
-// @version      0.8
+// @version      0.9
 // @description  Bing首页和搜索优化
 // @author       wz
 // @require https://cdn.staticfile.org/jquery/2.1.4/jquery.min.js
