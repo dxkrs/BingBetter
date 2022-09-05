@@ -1,14 +1,18 @@
 // ==UserScript==
-// @name         Bing美化0.3
+// @name         Bing美化
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.8
 // @description  Bing首页和搜索优化
 // @author       wz
 // @require https://cdn.staticfile.org/jquery/2.1.4/jquery.min.js
 // @match        *://*.bing.com/*
 // @grant       GM_addStyle
-// @run-at       document-body
+// @grant       GM_xmlhttpRequest
+// @grant       GM_getValue
+
+// @run-at       document-start
 // @license MIT
+// @connect     geekzwzs.cn
 // @icon    data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJAAAACQCAMAAADQmBKKAAAAgVBMVEUAAAAAg3QAg3MAg3UAhHMAg3MAh3cAg3MAg3MAg3MAg3MAg3MAg3MAg3MAg3MAhHMAg3EAgnMAhXQAhHYAg3MAhHMAg3MAg3MAg3QAg3MAg3QAg3MAg3MAgnMAg3MAg3MAg3MAg3IAg3MAgnMAg3MAhHIAg3MAhHMAg3QAg3MAg3OfVFe2AAAAKnRSTlMAIfBMsvUG+6Xnct/LQdEaDS8TCu69qo4nlmJXOtjVxJ1pXTWHgHlTuEivE7PpAAACwElEQVR42u3cWW7jMBBF0SfbouZ59jw74f4X2I4DtDrpJGV+kCogvCs4H5RYogDCZvuFVSfwyplFYSHAJ2cmpQyWYNMd9JYbh+DRA/Rualclpu8OGnOHUw4T0aDR5JcwEA0a87ZdDxPRoLFdaMZEg8bS1woGokFjc4DOgqgsiMqCqCyIyoKoLIjKgqgsiMqCqCyIyoKoLIjKgqgsiMqCqCyIyoLuHUFkGrSYNYccRCZByeP4mjjmNwlCKh/5fQ4iQ6CDfM+r/R5ERkCZHIu7AkT6QfDlv8UHwqQf5HjyY9tbjjHzIBHIz9XxCmOmQQjlFwX+rQKmAaGWXzbr1tU0IF9+2zmfApTI73M358w4CKn8Ka8JHcOgo6RqkswkyJF03m5tDoRWPlO0SMyAxrc1bTonwgRIbOTTBVdHaAchlAp5QagdJAKplNuEuVYQ9lK1hV5Qwg2EmBvoyA2UcQOh5QYqPWYgpNxAvV/zAgHV4PECAVno8gIBebjhBbq33DIDAaeIGQhiveAFunfyXV4gIEt5gYTvsQJdA1ZraJ6yWtRlw+qxF3uX1YvxELHaOpKU1eZaLViNH6KrWc1Dxy2ribHY8ZqpW17fZZeA1bf9LZXKNWttoP5FnROtAE0gsffUPRcBXaAwUuf4PaAJ9Bqrc+I5oAmUteqcYAloAonBVfd0OXSBlpE6py0AXaBAnZPeAG0g9WYhwAk0lOAEWpwARqDNCmAE8i4AJ9A+AydQkwCMQNES4ATqAE4gvwcn0GPI4AMKDniLDWio8IgJaFFAV1msztmuoLNLrcapr9Bc2SntEyX0V/jPcl7WMFOye2rIOMJcK3IpuWcYLV+6P3raDKZzOu9bzi7BFDmNSwwZxiui/znegAmr5rPPi8fBtFXX4OOQMX3l3z+FAZdbgPL44Rn43N0kklS+FGDVGjabjeoP6mzXo0ZEh6sAAAAASUVORK5CYII=
 
 // ==/UserScript==
@@ -17,14 +21,20 @@
 (function() {
     if(location.href.indexOf('bing.com/search?q=') > 0 ){
         addSearchStyle();
-        bing_search();
     }else{
         addIndexStyle();
         bing_index();
     }
 
 })();
-
+window.onload=function(){
+    console.log('加载完成')
+    if(location.href.indexOf('bing.com/search?q=') > 0 ){
+        $('#b_content').fadeIn(200)
+        bing_ad()
+        bing_search();
+    }
+}
 
 //Bing首页美化
 function bing_index(){
@@ -41,69 +51,54 @@ function bing_index(){
 
 //Bing搜索页美化
 function bing_search(){
+    //百度热搜
+    getNews()
+    // 更换网站图标
     setTimeout(()=>{
-        $(".b_ad").remove();
-        $(".b_algo").each(()=>{
-            let b_algokg=0;
-            if ($(this).find("p")){
-                if ($(this).find("p").attr("class")){
-                    b_algokg=1;
-                }
-            }
-            if ($(this).text().indexOf('广告') >0){
-                b_algokg=1;
-            }
-            let anum=$(this).find(".b_attribution").children().length;
-            if (anum==1 && b_algokg==1){
-                $(this).hide();
-            }
-        })
-        //百度热搜
-        getNews()
-        // 更换网站图标
         const imgList = document.getElementsByClassName("rms_img")
         for (let i = 0; i < imgList.length; i++) {
             if(imgList[i].alt ==="全球 Web 图标"&&imgList[i].src.indexOf("&w=")){
                 imgList[i].src=imgList[i].src.split("&w=")[0]
             }
         }
-        const sh_favicon = document.querySelector(".sh_favicon")
-        if(sh_favicon) sh_favicon.style.setProperty("visibility", "visible", "important");
-        //政府tag
-        $(".b_title").each(function(i){
-            if($(this).context.firstChild.href.indexOf(".gov")>0){
-                var a = document.createElement("span")
-                a.innerText="政府"
-                a.className = "tag tag-gov"
-                $(this).context.appendChild(a)
-            }
-        })
+    },300)
 
-    },800)
+    const sh_favicon = document.querySelector(".sh_favicon")
+    if(sh_favicon) sh_favicon.style.setProperty("visibility", "visible", "important");
+    //政府tag
+    $(".b_title").each(function(i){
+        if($(this).context.firstChild.href.indexOf(".gov")>0){
+            var a = document.createElement("span")
+            a.innerText="政府"
+            a.className = "tag tag-gov"
+            $(this).context.appendChild(a)
+        }
+    })
 
 }
 
 function getNews(){
-    $.get("https://api.geekzwzs.cn/resou", {}, function(data){
-        const result = JSON.parse(data).data[0]
-        const title = `<div class="news_type">${result.text}</div>`
-       const list = result.value.slice(0, 15).map((v,i)=>`<div class="news_item"><span class="news_index">${i+1}</span><a class="news_link" href=${v.rawUrl}>${v.wordQuery}</a>${v.hotTag==3?'<span class="tag tag-gov">热</span>':''}</div>`)
-       let hotSearch = document.createElement("div");
-        hotSearch.innerHTML=title+list.join("")
-        hotSearch.className="hot_search"
-        hotSearch.style="position: absolute; top: 0;left: 1050px; width: 300px;"
-        $("#b_content main").append(hotSearch)
-        $("#b_content main").css("position","relative")
-        //添加style
-        let styleNode = document.createElement("style");
-        styleNode.innerHTML=
-            ".news_type{font-size: 17px;color: #222;margin-bottom: 15px;font-weight: 600;}"+
-            ".news_item{padding:8px 0;font-size: 14px;}"+
-            ".news_index{width: 25px;text-align: center; display: inline-block;color:#9195A3}"+
-            ".news_item:nth-child(-n+4) .news_index{color:#FE2D46}"
-        styleNode.type = 'text/css';
-        document.getElementsByTagName('head')[0].appendChild(styleNode);
+    GM_xmlhttpRequest({
+        method: "get",
+        url: "https://api.geekzwzs.cn/resou",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
+        },
+
+        onload: function(data){
+            const result = JSON.parse(data.response).data[0];
+            const title = `<div class="news_type">${result.text}</div>`;
+            const list = result.value.slice(0, 15).map((v,i)=>`<div class="news_item"><span class="news_index">${i+1}</span><a class="news_link" href=${v.rawUrl}>${v.wordQuery}</a>${v.hotTag==3?'<span class="tag tag-hot">热</span>':''}</div>`)
+            let hotSearch = document.createElement("div");
+            hotSearch.innerHTML=title+list.join("");
+            hotSearch.className="hot_search";
+            $("#b_content main").append(hotSearch);
+        },
+        onerror: function(response){
+            console.log("请求失败");
+        }
     });
+
 }
 
 // 添加首页 css样式
@@ -123,18 +118,36 @@ function addIndexStyle() {
 // 添加搜索页 css样式
 function addSearchStyle() {
     let css = `
-       #b_header{position:sticky;z-index:99999;top:0}
+       .news_type{font-size: 17px;color: #222;margin-bottom: 15px;font-weight: 600;}
+       .hot_search{position: absolute; top: 220px;left: 1150px; width: 300px;}
+       .news_index{width: 25px;text-align: center; display: inline-block;color:#9195A3}
+       .news_item:nth-child(-n+4) .news_index{color:#FE2D46}
+       .news_item{padding:8px 0;font-size: 14px;}
+       #b_header{background-color:#fff!important;position:sticky;z-index:99999;top:0;box-shadow: 0px 3px 6px #eee;}
        #b_results{width:850px}
        body{font-size:13px}
        .sh_favicon{visibility:visible!important}
-       .dlCollapsedCnt,#b_algospacing,.mic_cont,#textDeeplinksWidgetContainer,#wikiWidgetContainer,#b_context,.b_ans,.b_nwsAns,.b_sideBleed,#lgImgAnsContainer,.pagereco_anim,.b_mop,.b_bop,.pageRecoContainer,.mic_cont{display:none!important}
-       #b_header{background-color:#fff!important}
+       #est_switch .est_unselected::after{background:none;border:none}
+       #est_switch .est_selected::after{background-color:#fff}
+       #b_content{display:none}
+       .dlCollapsedCnt,#b_algospacing,.b_vidAns,#b_footer,.mic_cont,.b_ad,#LGPopDomainsContainer,#textDeeplinksWidgetContainer,#wikiWidgetContainer,#b_context,.b_nwsAns,#lgImgAnsContainer,.pagereco_anim,.b_mop,.b_bop,.pageRecoContainer,.mic_cont{display:none!important}
        a>strong{color:#2440b3!important}
        p>strong{color:#f73131!important}
        li.b_algo a{color:#2440b3!important}
        cite{color:#70757a!important;font-size: 13px;}
        .tag{color:#fff;background-color:#F60; border-radius: 2px;font-size: 12px;padding: 1px 2px;margin-left: 3px;}
-       #est_switch{display:none}
+       .tag-gov{background-color:#355cf9;}
     `
     GM_addStyle(css)
+}
+
+
+function bing_ad() {
+    $(".b_ad").remove();
+    $(".b_algo").each(function() {
+        if ($(this).children(":first")[0].nodeName=="H2"){
+            $(this).hide();
+        }
+    })
+
 }
