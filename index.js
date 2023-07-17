@@ -17,7 +17,7 @@
 
 
 (function() {
-    if(/^(https?:\/\/)?cn\.bing\.com\/orgid\/idtoken\/nosignin$/i.test(location.href)){
+    if(/^(https?:\/\/)?(cn|www)\.bing\.com\/orgid\/idtoken\/nosignin$/i.test(location.href)){
        return
     }
     if(location.href.indexOf('bing.com/search?q=') > 0 ){
@@ -29,7 +29,7 @@
 
 })();
 window.onload=function(){
-    if(/^(https?:\/\/)?cn\.bing\.com\/orgid\/idtoken\/nosignin$/i.test(location.href)){
+    if(/^(https?:\/\/)?(cn|www)\.bing\.com\/orgid\/idtoken\/nosignin$/i.test(location.href)){
        return
     }
     if(location.href.indexOf('bing.com/search?q=') > 0 ){
